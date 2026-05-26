@@ -1,12 +1,8 @@
-<<<<<<< HEAD
-# ev-charging-station-finder
-The app build to navigate to your nearest ev charging station along with route plannind also navigating to your destinated location
-=======
-# Smart EV Charging Station Finder
+# Smart EV Charging Station Finder (capstone Project)
 
-A production-level full-stack MERN application for discovering, planning routes to, and managing electric vehicle charging stations across Australia.
+ Full-stack MERN application for discovering, planning routes to, and managing electric vehicle charging stations across Australia.
 
-## Architecture Overview
+## folder structure
 
 ```
 ev-charging-app/
@@ -226,4 +222,3 @@ Greedy algorithm that selects the farthest reachable station that minimizes rema
 ## License
 
 This project is built as a capstone project for educational purposes.
->>>>>>> a3fed5d (first commit)
