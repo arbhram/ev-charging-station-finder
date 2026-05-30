@@ -78,8 +78,10 @@ const calculateChargingTime = (
 
   const hours = Math.floor(timeMinutes / 60);
   const minutes = timeMinutes % 60;
-  const timeFormatted =
-    hours > 0 ? `${hours}h ${minutes}m` : `${minutes} minutes`;
+  const hLabel = hours === 1 ? 'hr' : 'hrs';
+  const timeFormatted = hours > 0
+    ? (minutes === 0 ? `${hours} ${hLabel}` : `${hours} ${hLabel} ${minutes} min`)
+    : `${timeMinutes} min`;
 
   return {
     timeMinutes,

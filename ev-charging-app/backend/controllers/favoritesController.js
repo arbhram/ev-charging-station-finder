@@ -12,7 +12,7 @@ const getFavorites = asyncHandler(async (req, res) => {
     .populate({
       path: 'favorites',
       select:
-        'name location chargerLevel connectors pricing rating amenities operatingHours',
+        'name location chargerLevel connectors pricing rating amenities operatingHours osmId',
       match: { isActive: true },
     })
     .select('favorites');
@@ -99,9 +99,68 @@ const checkFavorite = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Upsert an OSM/community station into DB and add to favorites
+ * @route   POST /api/favorites/adopt
+ * @access  Private
+ */
+const adoptAndFavorite = asyncHandler(async (req, res) => {
+  const { station: s } = req.body;
+  if (!s || typeof s._id !== 'string' || /^[0-9a-f]{24}$/i.test(s._id)) {
+    throw ApiError.badRequest('Invalid community station data');
+  }
+
+  const osmId = s._id; // stores 'osm-xxx' or 'ocm-xxx' external IDs
+  const adopted = await ChargingStation.findOneAndUpdate(
+    { osmId },
+    {
+      $set: {
+        name: s.name || 'EV Charging Station',
+        'location.type': 'Point',
+        'location.coordinates': s.location.coordinates,
+        'location.formattedAddress': s.location.formattedAddress || '',
+        'location.address': s.location.address || {},
+        chargerLevel: s.chargerLevel || 'Level 2',
+        connectors: (s.connectors || []).map((c) => ({
+          type: c.type || 'Type 2',
+          powerKW: c.powerKW || 22,
+          quantity: c.quantity || 1,
+          available: c.available ?? c.quantity ?? 1,
+          status: c.status || 'available',
+        })),
+        'pricing.isFree': s.pricing?.isFree || false,
+        'pricing.perKWh': s.pricing?.perKWh || 0,
+        'pricing.currency': s.pricing?.currency || 'AUD',
+        'operator.name': s.operator?.name || '',
+        isActive: true,
+      },
+      $setOnInsert: {
+        osmId,
+        dataSource: 'other',
+        isVerified: false,
+      },
+    },
+    { upsert: true, new: true, runValidators: false }
+  );
+
+  const mongoId = adopted._id.toString();
+  const user = await User.findById(req.user.id);
+  if (!user.favorites.map((f) => f.toString()).includes(mongoId)) {
+    user.favorites.push(mongoId);
+    await user.save({ validateBeforeSave: false });
+  }
+
+  res.status(200).json({
+    success: true,
+    message: 'Community station saved to favorites',
+    data: { osmId, mongoId },
+  });
+});
+
 module.exports = {
   getFavorites,
   addFavorite,
   removeFavorite,
   checkFavorite,
+  adoptAndFavorite,
 };

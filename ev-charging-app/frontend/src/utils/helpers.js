@@ -89,6 +89,19 @@ export const truncate = (text, maxLength = 50) => {
  * @param {string|Date} date
  * @returns {string}
  */
+/**
+ * Format minutes into human-readable duration.
+ * e.g. 45 → "45 min", 90 → "1 hr 30 min", 120 → "2 hrs"
+ */
+export const formatMinutes = (totalMinutes) => {
+  const mins = Math.round(Number(totalMinutes) || 0);
+  if (mins < 60) return `${mins} min`;
+  const hrs = Math.floor(mins / 60);
+  const rem = mins % 60;
+  const hLabel = hrs === 1 ? 'hr' : 'hrs';
+  return rem === 0 ? `${hrs} ${hLabel}` : `${hrs} ${hLabel} ${rem} min`;
+};
+
 export const timeAgo = (date) => {
   const seconds = Math.floor((new Date() - new Date(date)) / 1000);
   const intervals = [

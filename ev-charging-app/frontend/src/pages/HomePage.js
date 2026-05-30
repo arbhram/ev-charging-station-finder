@@ -8,6 +8,7 @@ import stationService from '../services/stationService';
 import osmService from '../services/osmService';
 import AuthContext from '../context/AuthContext';
 import { favoritesService } from '../services/miscServices';
+import { formatMinutes } from '../utils/helpers';
 
 /* ── Small icon helpers ─────────────────────────────────────────── */
 const Icon = {
@@ -104,6 +105,7 @@ const HomePage = () => {
   const [destResults, setDestResults] = useState([]);
   const [destLoading, setDestLoading] = useState(false);
   const destJustSelected = useRef(false);
+  const osmToMongoId = useRef(new Map()); // maps 'osm-<id>' → MongoDB ObjectId string
 
   // Charging stop waypoints along route
   const [waypoints, setWaypoints] = useState([]);
@@ -127,26 +129,48 @@ const HomePage = () => {
 
   // Load favorites when authenticated
   useEffect(() => {
-    if (!user) { setFavoriteIds(new Set()); return; }
+    if (!user) { setFavoriteIds(new Set()); osmToMongoId.current.clear(); return; }
     favoritesService.getAll()
       .then((data) => {
         const list = Array.isArray(data) ? data : (data.data || data.stations || data.favorites || []);
-        setFavoriteIds(new Set(list.map((s) => s._id?.toString())));
+        const ids = new Set();
+        osmToMongoId.current.clear();
+        list.forEach((s) => {
+          const mongoId = s._id?.toString();
+          if (mongoId) ids.add(mongoId);
+          if (s.osmId) {
+            ids.add(s.osmId);
+            osmToMongoId.current.set(s.osmId, mongoId);
+          }
+        });
+        setFavoriteIds(ids);
       }).catch(() => {});
   }, [user]); // eslint-disable-line
 
   const handleToggleFavorite = async (station) => {
-    if (!user || station.source === 'osm') return;
+    if (!user) return;
     const id = station._id?.toString();
+    const isExternal = !/^[0-9a-f]{24}$/i.test(id ?? ''); // true for osm-xxx and ocm-xxx IDs
     const isNowFav = favoriteIds.has(id);
+
     // Optimistic update
     setFavoriteIds((prev) => {
       const next = new Set(prev);
       isNowFav ? next.delete(id) : next.add(id);
       return next;
     });
+
     try {
-      isNowFav ? await favoritesService.remove(id) : await favoritesService.add(id);
+      if (isNowFav) {
+        const mongoId = isExternal ? osmToMongoId.current.get(id) : id;
+        if (mongoId) await favoritesService.remove(mongoId);
+      } else if (isExternal) {
+        const result = await favoritesService.adopt(station);
+        const { osmId, mongoId } = result.data || {};
+        if (osmId && mongoId) osmToMongoId.current.set(osmId, mongoId);
+      } else {
+        await favoritesService.add(id);
+      }
     } catch {
       // Revert on failure
       setFavoriteIds((prev) => {
@@ -383,9 +407,6 @@ const HomePage = () => {
     lastNavPos.current = null;
   };
 
-  // Only DB stations have valid 24-char Mongo ObjectIds and can be favorited
-  const isMongoId = (id) => /^[0-9a-f]{24}$/i.test(String(id ?? ''));
-
   const toggleFilter = (key) => {
     setQuickFilters((prev) => {
       const next = { ...prev, [key]: !prev[key] };
@@ -555,7 +576,7 @@ const HomePage = () => {
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <span className="text-xs font-bold text-blue-600">{routeInfo.distanceKm.toFixed(1)} km</span>
                       <span className="text-blue-300">·</span>
-                      <span className="text-xs font-bold text-blue-600">{routeInfo.durationMin} min</span>
+                      <span className="text-xs font-bold text-blue-600">{formatMinutes(routeInfo.durationMin)}</span>
                       <span className="text-[10px] truncate flex-1 text-gray-500">{destination?.name}</span>
                     </div>
                     <button onClick={handleClearRoute} className="flex-shrink-0 text-gray-400 hover:text-gray-600">
@@ -792,7 +813,7 @@ const HomePage = () => {
                                   )}
                                   GO · {distKm} km
                                 </button>
-                                {user && isMongoId(station._id) && (
+                                {user && (
                                   <button onClick={(e) => { e.stopPropagation(); handleToggleFavorite(station); }}
                                     className={`w-9 flex-shrink-0 rounded-lg flex items-center justify-center transition-all border ${favoriteIds.has(station._id?.toString()) ? 'bg-red-50 border-red-200 text-red-500' : 'bg-gray-50 border-gray-200 text-gray-300 hover:text-red-400'}`}>
                                     <svg className="w-4 h-4" fill={favoriteIds.has(station._id?.toString()) ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -829,7 +850,7 @@ const HomePage = () => {
                     selected={selectedStation?._id === station._id}
                     dimmed={reachableIds ? !reachableIds.has(station._id?.toString()) : false}
                     isFavorite={favoriteIds.has(station._id?.toString())}
-                    onToggleFavorite={user && isMongoId(station._id) ? handleToggleFavorite : undefined}
+                    onToggleFavorite={user ? handleToggleFavorite : undefined}
                   />
                 ))}
 
@@ -884,7 +905,7 @@ const HomePage = () => {
             onAddStop={routeNearbyIds ? (s) => routeNearbyIds.has(s._id) && handleAddStop(s) : null}
             onRemoveStop={routeNearbyIds ? handleRemoveStop : null}
             favoriteIds={user ? favoriteIds : null}
-            onToggleFavorite={user ? (s) => isMongoId(s._id) && handleToggleFavorite(s) : null}
+            onToggleFavorite={user ? handleToggleFavorite : null}
             isNavigating={isNavigating}
             navLocation={navLocation}
             navHeading={navHeading}
@@ -892,6 +913,7 @@ const HomePage = () => {
             navStepIndex={currentStepIdx}
             navTotalSteps={routeSteps.length}
             flyTo={mapFlyTo}
+            sidebarOpen={sidebarOpen}
             className="w-full h-full"
           />
         </div>

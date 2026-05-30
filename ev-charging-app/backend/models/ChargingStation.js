@@ -144,6 +144,11 @@ const ChargingStationSchema = new mongoose.Schema(
       default: '',
       index: true,
     },
+    osmId: {
+      type: String,
+      sparse: true,
+      index: true,
+    },
     dataSource: {
       type: String,
       enum: ['manual', 'open_charge_map', 'afdc', 'other'],

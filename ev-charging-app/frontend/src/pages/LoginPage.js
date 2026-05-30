@@ -164,30 +164,6 @@ const LoginPage = () => {
               </p>
             </div>
 
-            {/* Demo credentials */}
-            <div className="mt-5 pt-5 border-t border-gray-100">
-              <p className="text-[11px] text-gray-400 text-center font-medium uppercase tracking-wider mb-3">Demo Credentials</p>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => { setEmail('demo@evcharging.com'); setPassword('Demo123!'); }}
-                  className="flex flex-col items-center px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs hover:bg-primary-50 hover:border-primary-200 transition-all"
-                >
-                  <span className="text-base mb-0.5">👤</span>
-                  <span className="font-semibold text-gray-700">User</span>
-                  <span className="text-[10px] text-gray-400">demo@evcharging.com</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setEmail('admin@evcharging.com'); setPassword('Admin123!'); }}
-                  className="flex flex-col items-center px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs hover:bg-accent-50 hover:border-accent-200 transition-all"
-                >
-                  <span className="text-base mb-0.5">🛡️</span>
-                  <span className="font-semibold text-gray-700">Admin</span>
-                  <span className="text-[10px] text-gray-400">admin@evcharging.com</span>
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>

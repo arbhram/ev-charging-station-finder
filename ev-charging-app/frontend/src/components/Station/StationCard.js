@@ -6,12 +6,18 @@ const LEVEL_CONFIG = {
   'Level 1':         { bg: 'bg-gray-100', text: 'text-gray-600', border: 'border-gray-200', dot: 'bg-gray-400' },
 };
 
+const isCoords = (str) => /^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/.test((str || '').trim());
+
 const StationCard = ({ station, onClick, onGo, onAddStop, onRemoveStop, isStop = false, stopOrder = 0, compact = false, showDistance = true, selected = false, dimmed = false, isFavorite = false, onToggleFavorite }) => {
   const levelCfg = LEVEL_CONFIG[station.chargerLevel] || LEVEL_CONFIG['Level 1'];
   const availableCount = station.connectors?.reduce((sum, c) => sum + (c.available || 0), 0) || 0;
   const totalCount = station.connectors?.reduce((sum, c) => sum + (c.quantity || 0), 0) || 0;
   const isAvailable = availableCount > 0;
   const isOSM = station.source === 'osm';
+  const rawAddr = station.location?.formattedAddress;
+  const displayAddr = isCoords(rawAddr)
+    ? (station.location?.address?.suburb || station.location?.address?.city || station.location?.address?.state || 'Location on map')
+    : (rawAddr || station.location?.address?.city || 'Location not specified');
 
   return (
     <div
@@ -37,15 +43,13 @@ const StationCard = ({ station, onClick, onGo, onAddStop, onRemoveStop, isStop =
             </h3>
             {isOSM && (
               <span className="flex-shrink-0 px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-gray-100 text-gray-400 uppercase tracking-wide mt-0.5">
-                OSM
+                Community
               </span>
             )}
           </div>
 
           {/* Address */}
-          <p className="text-xs text-gray-400 truncate">
-            {station.location?.formattedAddress || station.location?.address?.city || 'Location not specified'}
-          </p>
+          <p className="text-xs text-gray-400 truncate">{displayAddr}</p>
 
           {/* Level + availability row */}
           <div className="flex items-center gap-2 mt-2.5">

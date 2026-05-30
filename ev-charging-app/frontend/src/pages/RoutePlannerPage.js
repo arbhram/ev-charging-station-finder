@@ -4,6 +4,7 @@ import { LoadingSpinner, ErrorMessage } from '../components/Common/SharedCompone
 import osmService from '../services/osmService';
 import { useDebounce, useGeolocation } from '../hooks/useCustomHooks';
 import { useAuth } from '../context/AuthContext';
+import { formatMinutes } from '../utils/helpers';
 
 const VEHICLE_PRESETS = [
   { label: 'Tesla Model 3', range: 491, battery: 60, connector: 'Tesla Supercharger' },
@@ -213,7 +214,7 @@ const ChargingStopCard = ({ stop, onAdd, isAdded }) => {
 
         {/* Charge time + availability */}
         <div className="flex items-center justify-between text-[11px]">
-          <span className="text-gray-500">~{stop.chargeMinutes} min charge</span>
+          <span className="text-gray-500">~{formatMinutes(stop.chargeMinutes)} charge</span>
           <span className={totalAvail > 0 ? 'text-green-600 font-semibold' : 'text-red-500 font-semibold'}>
             {totalAvail}/{totalCount} available
           </span>
@@ -678,7 +679,7 @@ const RoutePlannerPage = () => {
               : st.pricing?.perKWh ? `$${st.pricing.perKWh.toFixed(2)}/kWh` : 'N/A';
             setNotification({
               title:   `Charging stop: ${st.name}`,
-              message: `Arrive ${first.predictedArrival} · ${first.arrivalBattery}% battery · ${provider} · ${powerKw} kW · ${price} · ~${first.chargeMinutes} min`,
+              message: `Arrive ${first.predictedArrival} · ${first.arrivalBattery}% battery · ${provider} · ${powerKw} kW · ${price} · ~${formatMinutes(first.chargeMinutes)}`,
             });
           }
         } else {
@@ -1072,12 +1073,12 @@ const RoutePlannerPage = () => {
                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Route Summary</h3>
                 <div className="grid grid-cols-2 gap-2">
                   <StatBox label="Distance" value={`${routeInfo.distanceKm.toFixed(1)} km`} />
-                  <StatBox label="Drive Time" value={`${routeInfo.durationMin} min`} color="text-primary-600" />
+                  <StatBox label="Drive Time" value={formatMinutes(routeInfo.durationMin)} color="text-primary-600" />
                   <StatBox label="Charging Stops" value={stopsLoading ? '…' : chargingStops.length} color="text-accent-600" />
                   <StatBox
                     label="Total Charge Time"
                     value={stopsLoading ? '…' : chargingStops.length > 0
-                      ? `${chargingStops.reduce((sum, s) => sum + s.chargeMinutes, 0)} min`
+                      ? formatMinutes(chargingStops.reduce((sum, s) => sum + s.chargeMinutes, 0))
                       : '—'}
                     color="text-secondary-600"
                   />

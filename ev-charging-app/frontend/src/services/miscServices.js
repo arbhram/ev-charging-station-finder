@@ -23,6 +23,11 @@ export const favoritesService = {
     const response = await api.get(`/favorites/check/${stationId}`);
     return response.data;
   },
+
+  adopt: async (station) => {
+    const response = await api.post('/favorites/adopt', { station });
+    return response.data;
+  },
 };
 
 /**

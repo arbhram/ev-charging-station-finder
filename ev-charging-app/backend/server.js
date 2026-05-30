@@ -120,13 +120,13 @@ const startServer = async () => {
     // Start server
     server.listen(PORT, '0.0.0.0', () => {
       logger.info(`
-  ╔══════════════════════════════════════════╗
-  ║   EV Charging Station API               ║
-  ║   Port: ${PORT}                            ║
-  ║   Environment: ${process.env.NODE_ENV || 'development'}          ║
-  ║   MongoDB: Connected                    ║
-  ║   Socket.IO: Active                     ║
-  ╚══════════════════════════════════════════╝
+  
+  EV Charging Station API               
+  Port: ${PORT}                            
+  Environment: ${process.env.NODE_ENV || 'development'}          
+  MongoDB: Connected                    
+  Socket.IO: Active                     
+
       `);
     });
   } catch (error) {
@@ -159,30 +159,3 @@ process.on('SIGTERM', () => {
 startServer();
 
 module.exports = { app, server };
-
-
-// const express = require("express");
-// const mongoose = require("mongoose");
-// const cors = require("cors");
-
-// const app = express();
-
-// app.use(cors());
-// app.use(express.json());
-
-// // Test Route
-// app.get("/", (req, res) => {
-//   res.send("Server working 🚀");
-// });
-
-// // MongoDB Connection
-// mongoose
-//   .connect("mongodb+srv://pandeyarbhram1845_db_user:EZUZ7mwMCJKbO3OA@capstonedb.nevphgb.mongodb.net/?appName=capstoneDB")
-//   .then(() => console.log("MongoDB Connected ✅"))
-//   .catch(err => console.log("MongoDB Error ❌", err));
-
-// const PORT = 3001;
-
-// app.listen(PORT, () => {
-//   console.log(`Server running on http://localhost:${PORT} 🚀`);
-// });

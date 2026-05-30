@@ -114,6 +114,7 @@ const MapView = ({
   waypointOrderMap = null,  // Map<stationId, stopNumber> for numbered marker display
   favoriteIds = null,       // Set of favorited station _ids
   onToggleFavorite = null,  // (station) => void
+  sidebarOpen = true,
   className = '',
 }) => {
   const mapContainerRef = useRef(null);
@@ -127,6 +128,13 @@ const MapView = ({
   const [showNotif, setShowNotif]   = useState(false);
   // { station, x, y } — x/y are pixels relative to mapContainerRef
   const [hoverState, setHoverState] = useState(null);
+
+  // Resize map when sidebar opens/closes (wait for CSS transition to finish)
+  useEffect(() => {
+    if (!mapRef.current || !mapReady) return;
+    const t = setTimeout(() => mapRef.current?.resize(), 310);
+    return () => clearTimeout(t);
+  }, [sidebarOpen, mapReady]);
 
   // Schedule hide after 120 ms — cancelled if mouse enters the card before then
   const scheduleHide = useCallback(() => {
@@ -382,6 +390,7 @@ const MapView = ({
             style={{ left, top }}
             onMouseEnter={cancelHide}
             onMouseLeave={scheduleHide}
+            onMouseDown={cancelHide}
           >
             <StationCard
               station={station}

@@ -66,7 +66,7 @@ const StationDetail = ({ station, onClose, onGetDirections }) => {
               </span>
               {isOSM && (
                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-400 border border-gray-200">
-                  OSM
+                  Community verified
                 </span>
               )}
               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${availableCount > 0 ? 'bg-secondary-100 text-secondary-700' : 'bg-red-100 text-red-600'}`}>
@@ -81,18 +81,6 @@ const StationDetail = ({ station, onClose, onGetDirections }) => {
 
           {/* Action buttons */}
           <div className="flex items-center gap-1 flex-shrink-0">
-            {onGetDirections && (
-              <button
-                onClick={() => onGetDirections(station)}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold transition-colors shadow-sm"
-                title="Get directions"
-              >
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                </svg>
-                Go
-              </button>
-            )}
             {isAuthenticated && isMongoId && (
               <button
                 onClick={toggleFavorite}
@@ -127,10 +115,22 @@ const StationDetail = ({ station, onClose, onGetDirections }) => {
             <p className="text-[10px] text-gray-400 mt-0.5">Max Power</p>
           </div>
           <div className="bg-white rounded-xl p-2.5 text-center border border-white/60 shadow-sm">
-            <p className="text-xs font-bold text-gray-800">
-              {station.pricing?.isFree ? 'Free' : station.pricing?.perKWh ? formatCurrency(station.pricing.perKWh) : 'N/A'}
-            </p>
-            <p className="text-[10px] text-gray-400 mt-0.5">{station.pricing?.isFree ? 'No charge' : 'Per kWh'}</p>
+            {station.pricing?.isFree ? (
+              <>
+                <p className="text-xs font-bold text-secondary-600">Free</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">No charge</p>
+              </>
+            ) : station.pricing?.perKWh ? (
+              <>
+                <p className="text-xs font-bold text-gray-800">{formatCurrency(station.pricing.perKWh)}</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">Per kWh</p>
+              </>
+            ) : (
+              <>
+                <p className="text-xs font-medium text-gray-400">Unknown</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">Price unavailable</p>
+              </>
+            )}
           </div>
           <div className="bg-white rounded-xl p-2.5 text-center border border-white/60 shadow-sm">
             <p className="text-xs font-bold text-gray-800">
@@ -199,8 +199,23 @@ const StationDetail = ({ station, onClose, onGetDirections }) => {
         </div>
       )}
 
+      {/* Full-width Go button */}
+      {onGetDirections && (
+        <div className="px-4 pt-3 pb-3 border-t border-gray-100">
+          <button
+            onClick={() => onGetDirections(station)}
+            className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
+            </svg>
+            Go{station.distance != null && ` · ${Number(station.distance).toFixed(1)} km`}
+          </button>
+        </div>
+      )}
+
       {/* Distance */}
-      {station.distance != null && (
+      {!onGetDirections && station.distance != null && (
         <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-100 rounded-b-2xl">
           <p className="text-xs text-gray-400 text-center">
             📍 {station.distance.toFixed(1)} km from your location

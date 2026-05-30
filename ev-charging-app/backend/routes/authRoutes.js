@@ -15,10 +15,8 @@ const {
   loginValidation,
   validate,
 } = require('../middleware/validation');
-const { loginLimiter, registerLimiter } = require('../middleware/rateLimiter');
-
-router.post('/register', registerLimiter, registerValidation, validate, register);
-router.post('/login', loginLimiter, loginValidation, validate, login);
+router.post('/register', registerValidation, validate, register);
+router.post('/login', loginValidation, validate, login);
 router.get('/me', protect, getMe);
 router.put('/profile', protect, updateProfile);
 router.put('/password', protect, updatePassword);
