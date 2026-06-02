@@ -76,7 +76,7 @@ const HomePage = () => {
   const [selectedStation, setSelectedStation] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [radius, setRadius] = useState(50);
+  const radius = 50;
   const [quickFilters, setQuickFilters] = useState({ nearby: false, fastCharger: false, connectorType: false, availableNow: false, alongRoute: false, favorites: false });
   const [favoriteIds, setFavoriteIds] = useState(new Set());
   const [connectorTypeFilter, setConnectorTypeFilter] = useState('');

@@ -115,8 +115,6 @@ const ChatBot = () => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
-  const isTyping = streaming && messages[messages.length - 1]?.content === '';
-
   return (
     <>
       {/* ── Chat panel ─────────────────────────────────── */}

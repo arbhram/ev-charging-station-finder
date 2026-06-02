@@ -141,3 +141,5 @@ UserSchema.methods.addRecentSearch = function (searchData) {
 };
 
 module.exports = mongoose.model('User', UserSchema);
+
+
