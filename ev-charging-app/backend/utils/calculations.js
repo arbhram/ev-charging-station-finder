@@ -100,7 +100,7 @@ const calculateChargingTime = (
  */
 const calculateChargingCost = (energyKWh, pricing, chargingTimeMinutes = 0) => {
   if (pricing.isFree) {
-    return { totalCost: 0, breakdown: { type: 'free' }, currency: pricing.currency || 'AUD' };
+    return { totalCost: 0, breakdown: { type: 'free' }, currency: pricing.currency || 'NPR' };
   }
 
   let totalCost = 0;
@@ -126,7 +126,7 @@ const calculateChargingCost = (energyKWh, pricing, chargingTimeMinutes = 0) => {
   return {
     totalCost: Math.round(totalCost * 100) / 100,
     breakdown,
-    currency: pricing.currency || 'AUD',
+    currency: pricing.currency || 'NPR',
   };
 };
 

@@ -130,7 +130,7 @@ const adoptAndFavorite = asyncHandler(async (req, res) => {
         })),
         'pricing.isFree': s.pricing?.isFree || false,
         'pricing.perKWh': s.pricing?.perKWh || 0,
-        'pricing.currency': s.pricing?.currency || 'AUD',
+        'pricing.currency': s.pricing?.currency || 'NPR',
         'operator.name': s.operator?.name || '',
         isActive: true,
       },

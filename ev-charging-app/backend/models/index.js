@@ -8,6 +8,7 @@ const Vehicle = require('./Vehicle');
 const Notification = require('./Notification');
 const Route = require('./Route');
 const Report = require('./Report');
+const HostProfile = require('./HostProfile');
 
 module.exports = {
   User,
@@ -16,4 +17,5 @@ module.exports = {
   Notification,
   Route,
   Report,
+  HostProfile,
 };

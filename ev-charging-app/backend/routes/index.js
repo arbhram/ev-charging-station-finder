@@ -14,5 +14,6 @@ router.use('/routes', require('./routePlannerRoutes'));
 router.use('/favorites', require('./favoritesRoutes'));
 router.use('/admin', require('./adminRoutes'));
 router.use('/v1/ai', require('./aiRoutes'));
+router.use('/host', require('./hostRoutes'));
 
 module.exports = router;

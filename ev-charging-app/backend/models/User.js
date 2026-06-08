@@ -35,9 +35,14 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['user', 'admin'],
+      enum: ['user', 'driver', 'host', 'admin'],
       default: 'user',
     },
+    wallet: {
+      balance: { type: Number, default: 0 },
+      currency: { type: String, default: 'NPR' },
+    },
+    phone: { type: String, default: '' },
     avatar: {
       type: String,
       default: '',

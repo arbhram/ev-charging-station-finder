@@ -46,7 +46,7 @@ const ChargingStationSchema = new mongoose.Schema(
         city: { type: String, default: '' },
         state: { type: String, default: '' },
         postcode: { type: String, default: '' },
-        country: { type: String, default: 'Australia' },
+        country: { type: String, default: 'Nepal' },
       },
       formattedAddress: { type: String, default: '' },
     },
@@ -64,6 +64,7 @@ const ChargingStationSchema = new mongoose.Schema(
             'Type 2',
             'CCS',
             'CCS2',
+            'GBT',
             'CHAdeMO',
             'Tesla Supercharger',
             'Tesla Destination',
@@ -103,7 +104,7 @@ const ChargingStationSchema = new mongoose.Schema(
       perKWh: { type: Number, default: 0 },
       perMinute: { type: Number, default: 0 },
       flatRate: { type: Number, default: 0 },
-      currency: { type: String, default: 'AUD' },
+      currency: { type: String, default: 'NPR' },
       isFree: { type: Boolean, default: false },
     },
     amenities: [
@@ -151,7 +152,7 @@ const ChargingStationSchema = new mongoose.Schema(
     },
     dataSource: {
       type: String,
-      enum: ['manual', 'open_charge_map', 'afdc', 'other'],
+      enum: ['manual', 'seed', 'open_charge_map', 'afdc', 'other'],
       default: 'manual',
     },
     isVerified: {

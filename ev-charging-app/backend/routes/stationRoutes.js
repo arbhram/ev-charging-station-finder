@@ -12,7 +12,7 @@ const {
   updateAvailability,
   verifyStation,
   bulkImport,
-
+  getSeededStations,
 } = require('../controllers/stationController');
 const { protect, authorize } = require('../middleware/auth');
 const {
@@ -29,6 +29,7 @@ router.use(stationLimiter);
 router.get('/', getStations);
 router.get('/nearby', getNearbyStations);
 router.get('/reachable', getReachableStations);
+router.get('/seeded', getSeededStations);
 
 // Admin routes
 router.get('/analytics/overview', protect, authorize('admin'), getStationAnalytics);

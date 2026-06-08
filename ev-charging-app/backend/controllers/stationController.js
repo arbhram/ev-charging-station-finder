@@ -1,6 +1,7 @@
 const { ChargingStation } = require('../models');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
+const nepalStations = require('../utils/nepalStations');
 const {
   calculateReachableDistance,
   filterReachableStations,
@@ -27,7 +28,7 @@ const getStations = asyncHandler(async (req, res) => {
     sortOrder = 'desc',
   } = req.query;
 
-  const filter = { isActive: true };
+  const filter = { isActive: true, 'location.address.country': 'Nepal' };
 
   if (chargerLevel) {
     filter.chargerLevel = chargerLevel;
@@ -46,15 +47,11 @@ const getStations = asyncHandler(async (req, res) => {
   }
 
   if (search) {
-    // Support suburb, postcode, state, city, or station name
-    const isPostcode = /^\d{4}$/.test(search.trim());
-    const auStates = ['NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'NT', 'ACT'];
-    const isState = auStates.includes(search.trim().toUpperCase());
+    const nepalProvinces = ['Bagmati', 'Gandaki', 'Lumbini', 'Koshi', 'Madhesh', 'Karnali', 'Sudurpashchim'];
+    const isProvince = nepalProvinces.some((p) => p.toLowerCase() === search.trim().toLowerCase());
 
-    if (isPostcode) {
-      filter['location.address.postcode'] = search.trim();
-    } else if (isState) {
-      filter['location.address.state'] = search.trim().toUpperCase();
+    if (isProvince) {
+      filter['location.address.state'] = { $regex: search.trim(), $options: 'i' };
     } else {
       filter.$or = [
         { 'location.address.suburb': { $regex: search, $options: 'i' } },
@@ -116,6 +113,7 @@ const getNearbyStations = asyncHandler(async (req, res) => {
       },
     },
     isActive: true,
+    'location.address.country': 'Nepal',
   };
 
   if (connectorType) {
@@ -423,7 +421,7 @@ const bulkImport = asyncHandler(async (req, res) => {
         location: { type: 'Point', coordinates: [Number(lng), Number(lat)], formattedAddress: address },
         chargerLevel: chargerLevel || 'Level 2',
         connectors: [{ type: connectorType || 'Type 2', powerKW: Number(powerKW) || 22, quantity: 1, available: 1, status: 'available' }],
-        pricing: { perKWh: Number(pricePerKWh) || 0, isFree: Number(pricePerKWh) === 0, currency: 'AUD' },
+        pricing: { perKWh: Number(pricePerKWh) || 0, isFree: Number(pricePerKWh) === 0, currency: 'NPR' },
         source: 'manual',
       };
     });
@@ -449,6 +447,27 @@ const bulkImport = asyncHandler(async (req, res) => {
   res.status(201).json({ success: true, count: inserted.length, data: inserted });
 });
 
+/**
+ * @desc    Return seed stations — tries DB first, falls back to static data
+ * @route   GET /api/stations/seeded
+ * @access  Public
+ */
+const getSeededStations = asyncHandler(async (req, res) => {
+  let stations = [];
+  try {
+    stations = await ChargingStation.find(
+      { dataSource: { $in: ['seed', 'manual'] }, isActive: true, 'location.address.country': 'Nepal' },
+      { __v: 0 }
+    ).lean();
+  } catch { /* DB unavailable — fall through to static data */ }
+
+  if (stations.length === 0) {
+    stations = nepalStations.map((s, i) => ({ ...s, _id: `seed-${i}` }));
+  }
+
+  res.json({ success: true, count: stations.length, data: stations });
+});
+
 module.exports = {
   getStations,
   getNearbyStations,
@@ -461,4 +480,5 @@ module.exports = {
   updateAvailability,
   verifyStation,
   bulkImport,
+  getSeededStations,
 };
